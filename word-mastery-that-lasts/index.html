@@ -230,38 +230,33 @@
 
 
 <!-- =============================================
-     TRACKING — META PIXEL + MICROSOFT CLARITY
-     Fires only after explicit user consent (UK PECR / UK GDPR compliant)
-     Replace XXXXXXXXXXXXXXXX with your Meta Pixel ID
-     Replace XXXXXXXXXX with your Clarity Project ID
+     CONSENT + TRACKING
+     GTM container: GTM-566SZTSD
+     GA4, Clarity (wano2hnnhw), and any Meta Pixel tags
+     are all managed inside GTM — not directly in this file.
+
+     HOW THE CONSENT GATE WORKS:
+     - GTM loads immediately (required so the dataLayer exists)
+     - No GTM tags fire until lq_consent_granted is pushed
+     - On accept: dataLayer push triggers all consent-dependent tags in GTM
+     - On decline: GTM loads but fires nothing
+     - Choice is stored in localStorage so banner never reappears
+
+     IN GTM — set each tag (GA4, Clarity, Meta Pixel) to fire on:
+       Custom Event → event name: lq_consent_granted
      ============================================= -->
+
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-566SZTSD');</script>
+<!-- End Google Tag Manager -->
+
 <script>
 (function(){
-  var META_PIXEL_ID  = 'XXXXXXXXXXXXXXXX'; // ← replace with your Meta Pixel ID
-  var CLARITY_ID     = 'XXXXXXXXXX';       // ← replace with your Clarity Project ID
-  var CONSENT_KEY    = 'lq_cookie_consent';
-
-  function loadMetaPixel() {
-    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
-    (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', META_PIXEL_ID);
-    fbq('track', 'PageView');
-  }
-
-  function loadClarity() {
-    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)}
-    )(window,document,"clarity","script",CLARITY_ID);
-  }
-
-  function activateTracking() {
-    loadMetaPixel();
-    loadClarity();
-  }
+  var CONSENT_KEY = 'lq_cookie_consent';
 
   function dismissBanner() {
     var banner = document.getElementById('lq-consent-banner');
@@ -276,24 +271,28 @@
   window.lqConsentAccept = function() {
     localStorage.setItem(CONSENT_KEY, 'accepted');
     dismissBanner();
-    activateTracking();
+    // Push consent event — GTM tags listening for lq_consent_granted will now fire
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'lq_consent_granted' });
   };
 
   window.lqConsentDecline = function() {
     localStorage.setItem(CONSENT_KEY, 'declined');
     dismissBanner();
+    // Nothing pushed — GTM loads but no tags fire
   };
 
-  // On load: check stored preference
   document.addEventListener('DOMContentLoaded', function(){
     var stored = localStorage.getItem(CONSENT_KEY);
     if (stored === 'accepted') {
-      activateTracking();
+      // Returning visitor who already accepted — fire immediately
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: 'lq_consent_granted' });
       document.getElementById('lq-consent-banner').style.display = 'none';
     } else if (stored === 'declined') {
       document.getElementById('lq-consent-banner').style.display = 'none';
     }
-    // else: no stored choice — banner remains visible
+    // No stored choice: banner stays visible, nothing fires
   });
 })();
 </script>
@@ -414,11 +413,16 @@
 </head>
 <body>
 
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-566SZTSD"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
 <!-- CONSENT BANNER -->
 <div id="lq-consent-banner" role="dialog" aria-label="Cookie consent">
   <div class="lq-consent-text">
     <span class="lq-consent-title">This site uses cookies</span>
-    <p>We use Meta Pixel to measure ad performance and Microsoft Clarity to understand how parents use this page. No data is sold. You can decline and the page works fully without them. <a href="https://lexilume.co/privacy-policy" target="_blank" rel="noopener">Privacy policy</a></p>
+    <p>We use analytics and ad performance tools to understand how parents find and use this page. No data is sold. You can decline and the page works fully without them. <a href="https://lexilume.co/privacy-policy" target="_blank" rel="noopener">Privacy policy</a></p>
     <div class="lq-consent-buttons">
       <button class="lq-consent-accept" onclick="lqConsentAccept()">Accept</button>
       <button class="lq-consent-decline" onclick="lqConsentDecline()">Decline</button>

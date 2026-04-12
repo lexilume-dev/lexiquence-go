@@ -228,8 +228,203 @@
 }
 </style>
 
+
+<!-- =============================================
+     TRACKING — META PIXEL + MICROSOFT CLARITY
+     Fires only after explicit user consent (UK PECR / UK GDPR compliant)
+     Replace XXXXXXXXXXXXXXXX with your Meta Pixel ID
+     Replace XXXXXXXXXX with your Clarity Project ID
+     ============================================= -->
+<script>
+(function(){
+  var META_PIXEL_ID  = 'XXXXXXXXXXXXXXXX'; // ← replace with your Meta Pixel ID
+  var CLARITY_ID     = 'XXXXXXXXXX';       // ← replace with your Clarity Project ID
+  var CONSENT_KEY    = 'lq_cookie_consent';
+
+  function loadMetaPixel() {
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+    (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', META_PIXEL_ID);
+    fbq('track', 'PageView');
+  }
+
+  function loadClarity() {
+    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)}
+    )(window,document,"clarity","script",CLARITY_ID);
+  }
+
+  function activateTracking() {
+    loadMetaPixel();
+    loadClarity();
+  }
+
+  function dismissBanner() {
+    var banner = document.getElementById('lq-consent-banner');
+    if (banner) {
+      banner.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      banner.style.opacity = '0';
+      banner.style.transform = 'translateY(12px)';
+      setTimeout(function(){ banner.style.display = 'none'; }, 320);
+    }
+  }
+
+  window.lqConsentAccept = function() {
+    localStorage.setItem(CONSENT_KEY, 'accepted');
+    dismissBanner();
+    activateTracking();
+  };
+
+  window.lqConsentDecline = function() {
+    localStorage.setItem(CONSENT_KEY, 'declined');
+    dismissBanner();
+  };
+
+  // On load: check stored preference
+  document.addEventListener('DOMContentLoaded', function(){
+    var stored = localStorage.getItem(CONSENT_KEY);
+    if (stored === 'accepted') {
+      activateTracking();
+      document.getElementById('lq-consent-banner').style.display = 'none';
+    } else if (stored === 'declined') {
+      document.getElementById('lq-consent-banner').style.display = 'none';
+    }
+    // else: no stored choice — banner remains visible
+  });
+})();
+</script>
+
+<style>
+/* =============================================
+   CONSENT BANNER
+   ============================================= */
+#lq-consent-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  width: calc(100% - 48px);
+  max-width: 640px;
+  background: #0E2050;
+  border-top: 3px solid #FFB700;
+  padding: 20px 24px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.32);
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  font-family: "proxima-nova", "Proxima Nova", "Helvetica Neue", sans-serif;
+}
+
+#lq-consent-banner p {
+  margin: 0 0 14px 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.78);
+  flex: 1;
+}
+
+#lq-consent-banner p a {
+  color: #FFB700;
+  text-decoration: underline;
+}
+
+.lq-consent-text {
+  flex: 1;
+}
+
+.lq-consent-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #FFB700;
+  margin-bottom: 8px;
+}
+
+.lq-consent-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lq-consent-accept {
+  background: #FFB700;
+  color: #0E2050;
+  border: none;
+  padding: 9px 18px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.lq-consent-accept:hover {
+  background: #FFC500;
+}
+
+.lq-consent-decline {
+  background: transparent;
+  color: rgba(255,255,255,0.45);
+  border: 1px solid rgba(255,255,255,0.18);
+  padding: 9px 18px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.lq-consent-decline:hover {
+  color: rgba(255,255,255,0.72);
+  border-color: rgba(255,255,255,0.36);
+}
+
+@media (max-width: 480px) {
+  #lq-consent-banner {
+    bottom: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+  }
+  .lq-consent-buttons {
+    flex-direction: column;
+  }
+  .lq-consent-accept,
+  .lq-consent-decline {
+    text-align: center;
+  }
+}
+</style>
+
 </head>
 <body>
+
+<!-- CONSENT BANNER -->
+<div id="lq-consent-banner" role="dialog" aria-label="Cookie consent">
+  <div class="lq-consent-text">
+    <span class="lq-consent-title">This site uses cookies</span>
+    <p>We use Meta Pixel to measure ad performance and Microsoft Clarity to understand how parents use this page. No data is sold. You can decline and the page works fully without them. <a href="https://lexilume.co/privacy-policy" target="_blank" rel="noopener">Privacy policy</a></p>
+    <div class="lq-consent-buttons">
+      <button class="lq-consent-accept" onclick="lqConsentAccept()">Accept</button>
+      <button class="lq-consent-decline" onclick="lqConsentDecline()">Decline</button>
+    </div>
+  </div>
+</div>
 
 <!-- =============================================
      HERO BANNER — LexiQuence®

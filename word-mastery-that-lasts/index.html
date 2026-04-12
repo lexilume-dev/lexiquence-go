@@ -16,6 +16,33 @@ html, body {
   max-width: 100%;
 }
 
+/* Table scroll wrapper — prevents tables breaking mobile layout */
+.lq-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+  .lq {
+    padding: 48px 16px !important;
+  }
+  .lq-founding {
+    padding: 32px 16px !important;
+  }
+  .lq-miss-table,
+  .lq-compare-table {
+    font-size: 13px !important;
+    min-width: 480px; /* forces scroll rather than squash */
+  }
+  .lq-miss-table td,
+  .lq-miss-table th,
+  .lq-compare-table td,
+  .lq-compare-table th {
+    padding: 10px 12px !important;
+  }
+}
+
 /* =============================================
    LEXIQUENCE HERO BANNER
    ============================================= */
@@ -770,7 +797,7 @@ Most methods were not built to prevent forgetting. They were intended to introdu
 
     <span class="lq-eyebrow" style="margin-top:36px !important;">In a nutshell</span>
 
-    <table class="lq-miss-table">
+    <div class="lq-table-scroll"><table class="lq-miss-table">
 
       <thead><tr><th>Most preparation methods</th><th>Miss</th></tr></thead>
 
@@ -802,7 +829,7 @@ Most methods were not built to prevent forgetting. They were intended to introdu
 
       </tbody>
 
-    </table>
+    </table></div>
 
     <p class="lq-p" style="background:var(--lq-navy) !important; color:rgba(255,255,255,0.82) !important; padding:28px 24px !important; line-height:1.8 !important;">The last miss is preventable. For over twenty years, science has been proving it. The most efficient way to learn vocabulary is how we learn language: through our <strong style="color:#FFB700 !important;">senses, emotion and cognition</strong>.<br><br>With this in mind, LexiQuence® was created by parents and child for parents and children.</p>
 
@@ -820,7 +847,7 @@ Most methods were not built to prevent forgetting. They were intended to introdu
 
     <p class="lq-p">Tutors. Workbooks. Apps. Your time enforcing sessions after a full day at work. Almost none of that spend addresses retention. It addresses exposure. Those are two different things.</p>
 
-<table class="lq-miss-table">
+<div class="lq-table-scroll"><table class="lq-miss-table">
 
   <thead>
 
@@ -848,7 +875,7 @@ Most methods were not built to prevent forgetting. They were intended to introdu
 
   </tbody>
 
-</table>
+</table></div>
 
 <p class="lq-p-lg">You have already spent £500 on the problem. LexiQuence®, an evolving system, is £97 to close it. Once, for life.</p>
 
@@ -1124,7 +1151,7 @@ Most methods were not built to prevent forgetting. They were intended to introdu
 
     <p class="lq-p" style="margin-bottom:32px !important;">LexiQuence® Word Mastery is for the parents who are ready to do something that actually works.</p>
 
-    <table class="lq-for-table">
+    <div class="lq-table-scroll"><table class="lq-for-table">
 
       <thead>
 
@@ -1174,7 +1201,7 @@ Most methods were not built to prevent forgetting. They were intended to introdu
 
       </tbody>
 
-    </table>
+    </table></div>
 
   </div>
 

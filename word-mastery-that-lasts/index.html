@@ -37,30 +37,73 @@ h1, h2, h3, h4, p, li, td, th, span, a {
 
 @media (max-width: 640px) {
   .lq {
-    padding: 36px 14px !important;
+    padding: 20px 10px !important;
   }
   .lq-founding {
-    padding: 28px 14px !important;
+    padding: 24px 10px !important;
   }
   .lq-nav {
-    padding: 0 14px !important;
+    padding: 0 10px !important;
   }
   .lq-table-scroll {
-    margin: 0 -14px !important;
-    padding: 0 14px !important;
-    width: calc(100% + 28px) !important;
+    margin: 0 -10px !important;
+    padding: 0 10px !important;
+    width: calc(100% + 20px) !important;
+  }
+  /* Tighter line-height and margins on mobile */
+  .lq-p {
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    margin-bottom: 14px !important;
+  }
+  .lq-p-lg {
+    font-size: 17px !important;
+    line-height: 1.5 !important;
+    margin-bottom: 16px !important;
+  }
+  .lq-h2 {
+    font-size: clamp(18px, 5vw, 26px) !important;
+    margin-bottom: 14px !important;
+  }
+  .lq-eyebrow {
+    margin-bottom: 12px !important;
   }
   .lq-miss-table,
   .lq-compare-table,
   .lq-for-table {
     font-size: 13px !important;
-    min-width: 420px !important;
+    min-width: 300px !important;
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+  /* Table 1 (miss-table): equal columns — both have substantial content */
+  .lq-miss-table th:first-child,
+  .lq-miss-table td:first-child {
+    width: 50% !important;
+  }
+  .lq-miss-table th:last-child,
+  .lq-miss-table td:last-child {
+    width: 50% !important;
+  }
+  /* Table 2 (spend table, also miss-table class): 70/30 — short values on right */
+  /* Targeted by position in DOM — second miss-table gets overridden via JS-free approach */
+  /* Using the "Amount" header as signal via attribute not possible in pure CSS,
+     so we set a utility class on the wrapper instead — see HTML change below */
+  .lq-table-spend .lq-miss-table th:first-child,
+  .lq-table-spend .lq-miss-table td:first-child {
+    width: 70% !important;
+  }
+  .lq-table-spend .lq-miss-table th:last-child,
+  .lq-table-spend .lq-miss-table td:last-child {
+    width: 30% !important;
   }
   .lq-miss-table td,
   .lq-miss-table th,
   .lq-compare-table td,
-  .lq-compare-table th {
-    padding: 10px 12px !important;
+  .lq-compare-table th,
+  .lq-for-table td,
+  .lq-for-table th {
+    padding: 10px 10px !important;
   }
 }
 
@@ -868,7 +911,7 @@ Most methods were not built to prevent forgetting. They were intended to introdu
 
     <p class="lq-p">Tutors. Workbooks. Apps. Your time enforcing sessions after a full day at work. Almost none of that spend addresses retention. It addresses exposure. Those are two different things.</p>
 
-<div class="lq-table-scroll"><table class="lq-miss-table">
+<div class="lq-table-scroll lq-table-spend"><table class="lq-miss-table">
 
   <thead>
 
@@ -1062,7 +1105,7 @@ Most methods were not built to prevent forgetting. They were intended to introdu
 <!-- SECTION 06: FEATURES + FOR/NOT FOR                          -->
 <!-- ============================================================ -->
 
-<div class="lq lq-white">
+<div class="lq lq-white" style="padding-top:0 !important;">
 
   <div class="lq-inner">
 
@@ -1358,7 +1401,7 @@ Most methods were not built to prevent forgetting. They were intended to introdu
 
 <!-- Founding price block -->
 
-<div class="lq lq-gpale">
+<div class="lq lq-gpale" style="padding-top:0 !important;">
 
   <div class="lq-inner">
 

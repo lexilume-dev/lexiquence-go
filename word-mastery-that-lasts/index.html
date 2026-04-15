@@ -330,19 +330,12 @@ h1, h2, h3, h4, p, li, td, th, span, a {
 
 <!-- =============================================
      CONSENT + TRACKING
-     GTM container: GTM-566SZTSD
-     GA4, Clarity (wano2hnnhw), and any Meta Pixel tags
-     are all managed inside GTM — not directly in this file.
+     GTM container: GA4 and any Meta Pixel tags
+     are managed inside GTM
 
      HOW THE CONSENT GATE WORKS:
      - GTM loads immediately (required so the dataLayer exists)
-     - No GTM tags fire until lq_consent_granted is pushed
-     - On accept: dataLayer push triggers all consent-dependent tags in GTM
-     - On decline: GTM loads but fires nothing
-     - Choice is stored in localStorage so banner never reappears
-
-     IN GTM — set each tag (GA4, Clarity, Meta Pixel) to fire on:
-       Custom Event → event name: lq_consent_granted
+     - No GTM tags fire until lq_consent is pushed
      ============================================= -->
 
 <!-- Google Tag Manager -->
@@ -356,12 +349,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <script>
 // =============================================
 // CLARITY — direct inject (outside GTM)
-// Tag ID: wano2hnnhw
-//
-// Loads immediately on every page load unless the user has
-// previously explicitly denied analytics consent.
-// Stopped via clarity('stop') if user denies during this session.
-// NOTE: remove the Clarity tag from GTM — it is no longer needed there.
 // =============================================
 (function(){
   var stored = localStorage.getItem('lq_cookie_consent_v2');
@@ -392,7 +379,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 //   Meta Pixel: lq_consent_marketing
 //
 // Clarity is loaded directly above — NOT via GTM.
-// Delete the Clarity tag from GTM.
 //
 // On returning visits, stored preferences are read from
 // localStorage and the appropriate events are re-pushed
@@ -455,7 +441,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       }
       document.getElementById('lq-consent-banner').style.display = 'none';
     }
-    // No stored choice: banner stays visible, Clarity already running
   });
 })();
 </script>

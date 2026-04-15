@@ -354,8 +354,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 
 <script>
+// =============================================
+// CONSENT GATE — LexiQuence® / lexilume.co
+// GTM container: GTM-566SZTSD
+//
+// GTM loads unconditionally so dataLayer exists immediately.
+// No GTM tags fire until the relevant consent event is pushed.
+//
+// CUSTOM EVENTS — set each GTM tag to fire on:
+//   Analytics category (GA4 + Clarity):  lq_consent_analytics
+//   Marketing category (Meta Pixel):      lq_consent_marketing
+//
+// On returning visits, stored preferences are read from
+// localStorage and the appropriate events are re-pushed
+// automatically — no banner shown.
+// =============================================
 (function(){
-  var CONSENT_KEY = 'lq_cookie_consent';
+  var CONSENT_KEY = 'lq_cookie_consent_v2';
 
   function dismissBanner() {
     var banner = document.getElementById('lq-consent-banner');
@@ -367,28 +382,43 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }
   }
 
-  window.lqConsentAccept = function() {
-    localStorage.setItem(CONSENT_KEY, 'accepted');
-    dismissBanner();
-    // Push consent event — GTM tags listening for lq_consent_granted will now fire
+  function fireEvents(prefs) {
     window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ event: 'lq_consent_granted' });
+    if (prefs.analytics) window.dataLayer.push({ event: 'lq_consent_analytics' });
+    if (prefs.marketing) window.dataLayer.push({ event: 'lq_consent_marketing' });
+  }
+
+  window.lqConsentAccept = function() {
+    var prefs = { analytics: true, marketing: true };
+    localStorage.setItem(CONSENT_KEY, JSON.stringify(prefs));
+    dismissBanner();
+    fireEvents(prefs);
   };
 
-  window.lqConsentDecline = function() {
-    localStorage.setItem(CONSENT_KEY, 'declined');
+  window.lqConsentSave = function() {
+    var prefs = {
+      analytics: document.getElementById('lq-toggle-analytics').checked,
+      marketing: document.getElementById('lq-toggle-marketing').checked
+    };
+    localStorage.setItem(CONSENT_KEY, JSON.stringify(prefs));
     dismissBanner();
-    // Nothing pushed — GTM loads but no tags fire
+    fireEvents(prefs);
+  };
+
+  window.lqShowSettings = function() {
+    document.getElementById('lq-consent-main').style.display = 'none';
+    document.getElementById('lq-consent-settings').style.display = 'block';
   };
 
   document.addEventListener('DOMContentLoaded', function(){
     var stored = localStorage.getItem(CONSENT_KEY);
-    if (stored === 'accepted') {
-      // Returning visitor who already accepted — fire immediately
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({ event: 'lq_consent_granted' });
-      document.getElementById('lq-consent-banner').style.display = 'none';
-    } else if (stored === 'declined') {
+    if (stored) {
+      try {
+        fireEvents(JSON.parse(stored));
+      } catch(e) {
+        // Legacy value — treat as all accepted
+        fireEvents({ analytics: true, marketing: true });
+      }
       document.getElementById('lq-consent-banner').style.display = 'none';
     }
     // No stored choice: banner stays visible, nothing fires
@@ -412,9 +442,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   border-top: 3px solid #FFB700;
   padding: 20px 24px;
   box-shadow: 0 8px 40px rgba(0,0,0,0.32);
-  display: flex;
-  gap: 20px;
-  align-items: flex-start;
   font-family: "proxima-nova", "Proxima Nova", "Helvetica Neue", sans-serif;
 }
 
@@ -423,16 +450,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   font-size: 13px;
   line-height: 1.65;
   color: rgba(255,255,255,0.78);
-  flex: 1;
 }
 
 #lq-consent-banner p a {
   color: #FFB700;
   text-decoration: underline;
-}
-
-.lq-consent-text {
-  flex: 1;
 }
 
 .lq-consent-title {
@@ -470,10 +492,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   background: #FFC500;
 }
 
-.lq-consent-decline {
+.lq-consent-change {
   background: transparent;
-  color: rgba(255,255,255,0.45);
-  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.22);
   padding: 9px 18px;
   font-family: inherit;
   font-size: 11px;
@@ -485,9 +507,133 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   white-space: nowrap;
 }
 
-.lq-consent-decline:hover {
-  color: rgba(255,255,255,0.72);
-  border-color: rgba(255,255,255,0.36);
+.lq-consent-change:hover {
+  color: rgba(255,255,255,0.80);
+  border-color: rgba(255,255,255,0.40);
+}
+
+/* Settings panel */
+#lq-consent-settings {
+  display: none;
+}
+
+.lq-consent-settings-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #FFB700;
+  margin-bottom: 14px;
+}
+
+.lq-cookie-category {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.lq-cookie-category:last-of-type {
+  border-bottom: none;
+}
+
+.lq-cookie-label {
+  flex: 1;
+}
+
+.lq-cookie-label strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+  letter-spacing: 0.04em;
+}
+
+.lq-cookie-label span {
+  font-size: 11px;
+  color: rgba(255,255,255,0.50);
+  line-height: 1.5;
+}
+
+/* Toggle switch */
+.lq-toggle {
+  position: relative;
+  flex-shrink: 0;
+  width: 40px;
+  height: 22px;
+  margin-top: 1px;
+}
+
+.lq-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.lq-toggle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 11px;
+  background: rgba(255,255,255,0.15);
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.lq-toggle input:checked + .lq-toggle-track {
+  background: #FFB700;
+}
+
+.lq-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.lq-toggle input:checked + .lq-toggle-track::after {
+  transform: translateX(18px);
+}
+
+.lq-toggle-always {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #FFB700;
+  margin-top: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.lq-consent-save {
+  background: #FFB700;
+  color: #0E2050;
+  border: none;
+  padding: 9px 22px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 16px;
+  white-space: nowrap;
+}
+
+.lq-consent-save:hover {
+  background: #FFC500;
 }
 
 @media (max-width: 480px) {
@@ -503,7 +649,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     flex-direction: column;
   }
   .lq-consent-accept,
-  .lq-consent-decline {
+  .lq-consent-change,
+  .lq-consent-save {
     text-align: center;
   }
 }
@@ -519,14 +666,57 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- CONSENT BANNER -->
 <div id="lq-consent-banner" role="dialog" aria-label="Cookie consent">
-  <div class="lq-consent-text">
+
+  <!-- Main view -->
+  <div id="lq-consent-main">
     <span class="lq-consent-title">This site uses cookies</span>
-    <p>We use analytics and ad performance tools to understand how parents find and use this page. No data is sold. You can decline and the page works fully without them. <a href="https://lexilume.co/privacy-policy" target="_blank" rel="noopener">Privacy policy</a></p>
+    <p>We use analytics and ad performance tools to understand how parents find and use this page. No data is sold. <a href="https://lexilume.co/privacy-policy" target="_blank" rel="noopener">Privacy policy</a></p>
     <div class="lq-consent-buttons">
-      <button class="lq-consent-accept" onclick="lqConsentAccept()">Accept</button>
-      <button class="lq-consent-decline" onclick="lqConsentDecline()">Decline</button>
+      <button class="lq-consent-accept" onclick="lqConsentAccept()">Accept All</button>
+      <button class="lq-consent-change" onclick="lqShowSettings()">Change Settings</button>
     </div>
   </div>
+
+  <!-- Settings view -->
+  <div id="lq-consent-settings">
+    <span class="lq-consent-settings-title">Cookie Preferences</span>
+
+    <!-- Strictly Necessary — always on -->
+    <div class="lq-cookie-category">
+      <div class="lq-cookie-label">
+        <strong>Strictly Necessary</strong>
+        <span>Required for the page to function. Includes your cookie preference. Cannot be disabled.</span>
+      </div>
+      <span class="lq-toggle-always">Always on</span>
+    </div>
+
+    <!-- Analytics -->
+    <div class="lq-cookie-category">
+      <div class="lq-cookie-label">
+        <strong>Analytics</strong>
+        <span>Google Analytics 4 and Microsoft Clarity. Help us understand how parents navigate and use this page. No personal data is recorded.</span>
+      </div>
+      <label class="lq-toggle" aria-label="Analytics cookies">
+        <input type="checkbox" id="lq-toggle-analytics" checked>
+        <span class="lq-toggle-track"></span>
+      </label>
+    </div>
+
+    <!-- Marketing -->
+    <div class="lq-cookie-category">
+      <div class="lq-cookie-label">
+        <strong>Marketing</strong>
+        <span>Meta Pixel (Facebook/Instagram). Used to measure ad performance. Does not track browsing outside this site.</span>
+      </div>
+      <label class="lq-toggle" aria-label="Marketing cookies">
+        <input type="checkbox" id="lq-toggle-marketing" checked>
+        <span class="lq-toggle-track"></span>
+      </label>
+    </div>
+
+    <button class="lq-consent-save" onclick="lqConsentSave()">Save My Preferences</button>
+  </div>
+
 </div>
 
 <!-- =============================================

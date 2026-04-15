@@ -355,6 +355,32 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <script>
 // =============================================
+// CLARITY — direct inject (outside GTM)
+// Tag ID: wano2hnnhw
+//
+// Loads immediately on every page load unless the user has
+// previously explicitly denied analytics consent.
+// Stopped via clarity('stop') if user denies during this session.
+// NOTE: remove the Clarity tag from GTM — it is no longer needed there.
+// =============================================
+(function(){
+  var stored = localStorage.getItem('lq_cookie_consent_v2');
+  var denied = false;
+  if (stored) {
+    try { denied = (JSON.parse(stored).analytics === false); } catch(e) {}
+  }
+  if (!denied) {
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window,document,"clarity","script","wano2hnnhw");
+  }
+})();
+</script>
+
+<script>
+// =============================================
 // CONSENT GATE — LexiQuence® / lexilume.co
 // GTM container: GTM-566SZTSD
 //
@@ -362,8 +388,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 // No GTM tags fire until the relevant consent event is pushed.
 //
 // CUSTOM EVENTS — set each GTM tag to fire on:
-//   Analytics category (GA4 + Clarity):  lq_consent_analytics
-//   Marketing category (Meta Pixel):      lq_consent_marketing
+//   GA4:        lq_consent_analytics
+//   Meta Pixel: lq_consent_marketing
+//
+// Clarity is loaded directly above — NOT via GTM.
+// Delete the Clarity tag from GTM.
 //
 // On returning visits, stored preferences are read from
 // localStorage and the appropriate events are re-pushed
@@ -388,11 +417,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     if (prefs.marketing) window.dataLayer.push({ event: 'lq_consent_marketing' });
   }
 
+  function stopClarity() {
+    if (typeof clarity === 'function') clarity('stop');
+  }
+
   window.lqConsentAccept = function() {
     var prefs = { analytics: true, marketing: true };
     localStorage.setItem(CONSENT_KEY, JSON.stringify(prefs));
     dismissBanner();
     fireEvents(prefs);
+    // Clarity already running — nothing extra needed
   };
 
   window.lqConsentSave = function() {
@@ -403,6 +437,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     localStorage.setItem(CONSENT_KEY, JSON.stringify(prefs));
     dismissBanner();
     fireEvents(prefs);
+    if (!prefs.analytics) stopClarity();
   };
 
   window.lqShowSettings = function() {
@@ -416,12 +451,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       try {
         fireEvents(JSON.parse(stored));
       } catch(e) {
-        // Legacy value — treat as all accepted
         fireEvents({ analytics: true, marketing: true });
       }
       document.getElementById('lq-consent-banner').style.display = 'none';
     }
-    // No stored choice: banner stays visible, nothing fires
+    // No stored choice: banner stays visible, Clarity already running
   });
 })();
 </script>

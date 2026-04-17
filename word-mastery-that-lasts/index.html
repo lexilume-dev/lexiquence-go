@@ -423,7 +423,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     localStorage.setItem(CONSENT_KEY, JSON.stringify(prefs));
     dismissBanner();
     fireEvents(prefs);
-    if (!prefs.analytics) stopClarity();
   };
 
   window.lqShowSettings = function() {
